@@ -1,0 +1,1 @@
+This is the default DATA_DIR for the flaskapp, where the sqlite3 db will be created

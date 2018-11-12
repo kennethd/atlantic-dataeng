@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block body %}
+  <h1>Upload Customer Data</h1>
+  <div>
+    <form enctype="multipart/form-data" method="POST">
+        <input type="file" name="custdata">
+        <br>
+        <input type="submit">
+    </form>
+  </div>
+{% endblock %}
+
