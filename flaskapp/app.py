@@ -2,7 +2,11 @@ import argparse
 import os
 import sys
 
-from flask import Flask, flash, request, redirect, render_template, url_for
+from flask import Flask, flash, request, redirect, render_template
+from werkzeug.utils import secure_filename
+
+from atldata.ingest import ingest_file
+
 
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
 INST_DIR = os.path.dirname(APP_DIR)
@@ -34,11 +38,15 @@ def configured_app(config_module=None, debug=False):
     def upload_customer_data():
         if request.method == 'POST':
 
-            if 'file' not in request.files:
-                flash('No file part in request')
+            print(request.files)
+            print(request.files['custdata'])
+            print(dir(request.files['custdata']))
+
+            if 'custdata' not in request.files:
+                flash('No file uploaded')
                 return redirect(request.url)
 
-            f = request.files['file']
+            f = request.files['custdata']
 
             if not f.filename:
                 flash('No selected file')
@@ -49,13 +57,19 @@ def configured_app(config_module=None, debug=False):
                 return redirect(request.url)
 
             filename = secure_filename(f.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
             try:
-                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                f.save(filepath)
             except Exception as ex:
                 # There are very few times I will accept bare exceptions,
                 # this is mostly a concession to time constraints
                 flash(str(ex))
+                return redirect(request.url)
+
+            msgs = ingest_file(filepath)
+            for msg in msgs:
+                flash(msg)
                 return redirect(request.url)
 
         return render_template('index.html')

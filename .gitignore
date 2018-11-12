@@ -2,3 +2,6 @@
 *.sw[op]
 *.py[co]
 /atlantic-venv3
+/build
+/uploads/*.csv
+/uploads/*.tsv
