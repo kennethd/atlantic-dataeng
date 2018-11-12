@@ -70,7 +70,7 @@ def configured_app(config_module=None, debug=False):
             msgs = ingest_file(filepath)
             for msg in msgs:
                 flash(msg)
-                return redirect(request.url)
+            return redirect(request.url)
 
         return render_template('index.html')
 
