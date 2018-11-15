@@ -6,11 +6,11 @@
 # Introduction
 
 Given the time constraint, I chose to use `sqlite3` as the db, as it requires
-zero setup.  I tend to not be a fan of ORMs, though I've used SQLAlchemy in
-the past, I thought it'd be faster for me to just write the SQL, though I
-just ended up spending too much time on custom validation code instead, and
-ran out of time before actually writing anything to the db anyway.  I think
-the structure of the code is pretty self-evident though.
+zero setup.
+
+I tend to not be a fan of ORMs, and though I've used SQLAlchemy in the past, I
+thought it'd be faster to just write the SQL, but ended up writing a custom
+little ORMish thing anyway.
 
 I like to make a point of keeping the webapp layer as thin as possible, simply
 being responsible for enforcing authentication, parsing input, passing data to
@@ -23,19 +23,25 @@ Blueprint, further minimizing the custom code in the web app layer.  Most of
 the flaskapp tests are just stubs to illustrate the approach I would take in
 creating them.
 
-This UI should use jQuery or the like to POST via Ajax, accepting a (one or
-incremental?) JSON response with status & error reporting info.  I didn't want
-to spend the entire 2 hours working on the UI.
+Hopefully the existing test stubs provide an idea of how I organize tests,
+testing is important to me and I usually aim for > 95% coverage.
 
-The data ingestion is designed to be all-or-nothing.  I think ideally it would
-ingest good rows, and report errors for rows that fail to validate.
+# Branches
 
+Of the branches available here:
+
+  * **initial-submission** is how far I got more or less within the instructed
+    time constraints, about 2.5 hours + the README
+  * **diyorm** is the state of the project after the first successful data
+    ingestion.  This involved about an additional 1.5 hours for the front end
+    and API changes, and about the same for the backend data layer completion
+    (if you don't count time wasted trying to get FOREIGN KEY and TRIGGER
+    support working in my sqlite3)
 
 # Setup
 
 Clone the repo & activate the virtualenv, then upgrade pip and install the
 dependencies into the active virtualenv:
-
 ```python
 kenneth@x1:~/git.ylayali.net/atlantic-dataeng$ python3 -m venv atlantic-venv3
 kenneth@x1:~/git.ylayali.net/atlantic-dataeng$ . ./atlantic-venv3/bin/activate 
@@ -48,15 +54,8 @@ The library module has to be installed into the virtualenv as well:
 (atlantic-venv3) kenneth@x1:~/git.ylayali.net/atlantic-dataeng (master)$ python setup.py install
 ```
 
-This command does have to be re-run when library code changes, though I think
-if you import setuptools' `setup() instead of the `setup()` from the newer
-distutils, you can do this to work with a "developer egg":
-
-```python
-  3 # distutils does not support 'python setup.py develop'
-  4 #from distutils.core import setup
-  5 from setuptools import setup
-```
+This command does have to be re-run when library code changes, just rerun
+`python setup.py install` as needed.
 
 # Run
 
@@ -72,7 +71,7 @@ argument, or change the port with `--port`, see `--help` for details.
 
 # Test
 
-I mostly still use nosetests as a test runner, mostly out of having years of
+I still use nosetests as a test runner, mostly out of having years of
 experience with it.  To run the tests, activate the virtualenv and run:
 
 ```sh
