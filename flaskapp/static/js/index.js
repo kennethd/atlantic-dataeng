@@ -9,9 +9,9 @@ var CUSTDATA_PROGRESS_SEL = '#custdataprogress';
 var CUSTDATA_PROGRESSDIV_SEL = '#custdataprogressdiv';
 
 
-function updateStatus(msg) {
+function updateStatus(msg, divstyle) {
     var div = document.createElement("div");
-    div.className = "statusmsg";
+    div.className = divstyle || "statusmsg";
     div.append(msg);
     $(CUSTDATA_UPLOAD_STATUS_SEL).append(div);
 }
@@ -66,7 +66,11 @@ function postFile(evt) {
         processData: false,
         contentType: false
     }).done(function(response) {
-        updateStatus('Server Responded: ' + response);
+        console.log(response);
+        updateStatus('Server Responded: ' + response['success'] + ' successful updates');
+        for (var i = 0; i < response['errors'].length; i++) {
+            updateStatus(response['errors'][i], "errormsg");
+        }
     });
 }
 

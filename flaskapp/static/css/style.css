@@ -3,6 +3,7 @@ body { max-width: 960px; margin: 5 auto; }
 h1 { font-family: serif; color: #377ba8; margin: 1rem 0; }
 a { color: #377ba8; }
 div { padding: 5px; }
-.statusmsg { color: blue; }
+.statusmsg { color: green; }
+.errormsg { color: red; }
 #custdataprogressdiv { padding: 0px; border: 1px; border-color: black; height: 20px; width: 400px; background: white; display: none; }
 #custdataprogress { padding: 0px; width: 1px; height: 100%; background: red; }

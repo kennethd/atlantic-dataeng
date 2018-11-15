@@ -19,6 +19,7 @@ ALLOWED_EXTENSIONS = ['tsv', 'csv']
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 def configured_app(config_module=None, debug=False):
     app = Flask(__name__)
     app.secret_key = os.urandom(24)
@@ -41,10 +42,6 @@ def configured_app(config_module=None, debug=False):
     @app.route('/custdataupload', methods=['POST'])
     def upload_customer_data():
         "Accepts POST data via Ajax request, returns status report as JSON"
-
-        print(request.files)
-        print(request.files['custdata'])
-        print(dir(request.files['custdata']))
 
         if 'custdata' not in request.files:
             flash('No file uploaded')
