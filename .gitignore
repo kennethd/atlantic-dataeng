@@ -3,5 +3,6 @@
 *.py[co]
 /atlantic-venv3
 /build
+/data/atldata.db
 /uploads/*.csv
 /uploads/*.tsv

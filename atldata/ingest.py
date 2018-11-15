@@ -2,8 +2,7 @@
 import csv
 import datetime
 
-from atldata.db import IntegerField, StringField, StateField, ValidationError
-
+from atldata.models import Customer, Product, Transaction, ValidationError, DataWarning
 
 
 def line_parser(line):
@@ -25,26 +24,35 @@ def line_parser(line):
 
     # transaction table
     action = line[6]
-    total = line[9]
+    amount = line[9]
     dt = line[10]
+
+    # .validate() may raise ValidationError, subclass of ValueError
+    cust = Customer(customer_id, first_name, last_name, address, state, zip_code)
+    cust.validate()
+    prod = Product(product_id, product_name)
+    prod.validate()
+    trans = Transaction(customer_id, product_id, action, amount, dt)
+    trans.validate()
+
+    # ok to insert/update
 
 
 def ingest_file(filepath):
-    status = {'success': 0, 'errors': []}
+    status = {'success': 0, 'errors': [], 'warnings': []}
     with open(filepath, 'r') as fh:
         # iterate over records as lazy generator
         data = csv.reader(fh, delimiter='\t')
         for line in data:
             try:
                 line_data = line_parser(line)
-            except ValueError as ex:
-                status.errors(append('RECORD PARSE ERROR: {}'.format(ex)))
-            except Exception as ex:
-                status.errors(append('UNEXPECTED ERROR WHILE PARSING {}: {}'.format(line, ex)))
-            else:
-                status['success'] = status['success'] + 1
+            except ValidationError as ex:
+                status['errors'].append('RECORD PARSE ERROR: {}'.format(ex))
+            except DataWarning as ex:
+                status['warnings'].append('Warning: {}'.format(ex))
 
-    status['errors'].append('Error One')
-    status['errors'].append('Error Two')
+    status['warnings'].append('Test Warning')
+    status['errors'].append('Test Error One')
+    status['errors'].append('Test Error Two')
     return status
 

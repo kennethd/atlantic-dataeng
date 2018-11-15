@@ -71,6 +71,9 @@ function postFile(evt) {
         for (var i = 0; i < response['errors'].length; i++) {
             updateStatus(response['errors'][i], "errormsg");
         }
+        for (var i = 0; i < response['warnings'].length; i++) {
+            updateStatus(response['warnings'][i], "warningmsg");
+        }
     });
 }
 
