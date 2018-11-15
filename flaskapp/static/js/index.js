@@ -67,7 +67,9 @@ function postFile(evt) {
         contentType: false
     }).done(function(response) {
         console.log(response);
-        updateStatus('Server Responded: ' + response['success'] + ' successful updates');
+        if (response['success']) {
+            updateStatus('Server Responded: ' + response['success'] + ' successful updates');
+        }
         for (var i = 0; i < response['errors'].length; i++) {
             updateStatus(response['errors'][i], "errormsg");
         }

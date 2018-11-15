@@ -1,4 +1,12 @@
 
+import logging
+
+from atldata.db import dbconn, upsert
+
+
+log = logging.getLogger(__name__)
+
+
 US_STATES = [
     'AK', 'AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL',
     'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
@@ -85,17 +93,40 @@ class DateTimeField(StringField):
 
 
 class DbTable(object):
+    table_name = None
+    pk = None
+
     def validate(self):
         for col in self.columns:
             col.validate()
 
-    def save(self):
+    def colvals(self):
+        "returns tuple of 2 lists (colnames, values)"
+        colnames = []
+        values = []
+        for c in self.columns:
+            colnames.append(c.colname)
+            values.append(c.value)
+        return (colnames, values)
+
+    def save(self, cur):
         # All-or-nothing, raises ValidationError or doesn't
         self.validate()
+        colnames, values = self.colvals()
+
+        where = {}
+        print("save(): PK:{} COLNAMES:{}".format(self.pk, colnames))
+        if self.pk and colnames.index(self.pk) > -1:
+            where = {self.pk: values[colnames.index(self.pk)]}
+
+        count = upsert(cur, self.table_name, colnames, values, where)
+
+        return count
 
 
 class Customer(DbTable):
     table_name = 'customers'
+    pk = 'id'
 
     def __init__(self, id=None, first_name=None, last_name=None, address=None, state=None, zip_code=None):
         self.columns = {
@@ -110,6 +141,7 @@ class Customer(DbTable):
 
 class Product(DbTable):
     table_name = 'products'
+    pk = 'id'
 
     def __init__(self, id=None, name=None):
         self.columns = {
@@ -122,6 +154,10 @@ class Transaction(DbTable):
     table_name = 'transactions'
 
     def __init__(self, customer_id, product_id, action=None, amount=None, dt=None):
+        self.customer_id = customer_id
+        self.product_id = product_id
+        self.action = action
+
         self.columns = {
             IntegerField('customer_id', customer_id, required=True),
             IntegerField('product_id', product_id, required=True),
@@ -129,4 +165,18 @@ class Transaction(DbTable):
             CurrencyField('amount', amount),
             DateTimeField('dt', 'dt', required=True),
         }
+
+    def save(self, cur):
+        super(Transaction, self).save(cur)
+
+        # in addition to recording transaction log, this model also maintains
+        # the current status of each customer<->product relationship via a
+        # UNIQUE constraint on the customers_products table's (customer_id,
+        # product_id) columns.
+        cols = ['customer_id', 'product_id', 'status']
+        vals = [self.customer_id, self.product_id, self.action]
+        where = {'customer_id': self.customer_id, 'product_id': self.product_id}
+        count = upsert(cur, 'customers_products', cols, vals, where)
+        if not count:
+            log.warn('Failed to upsert customers_products')
 

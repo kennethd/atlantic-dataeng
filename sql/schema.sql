@@ -36,19 +36,19 @@ CREATE TABLE customers_products
     product_id INTEGER NOT NULL,
     status STRING NOT NULL, -- 'new', 'cancelled'
     created STRING DEFAULT CURRENT_TIMESTAMP,
-    last_modified STRING DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES (customers.id),
-    FOREIGN KEY (product_id) REFERENCES (products.id)
+    last_modified STRING DEFAULT CURRENT_TIMESTAMP --,
+    --FOREIGN KEY (customer_id) REFERENCES (customers.id),
+    --FOREIGN KEY (product_id) REFERENCES (products.id)
 );
 
 CREATE UNIQUE INDEX idx_customers_products_customer_id_product_id ON customers_products(customer_id, product_id);
 CREATE INDEX idx_customers_products_created ON customers_products(created);
 CREATE INDEX idx_customers_products_last_modified ON customers_products(last_modified);
 
-CREATE TRIGGER update_customers_products AFTER UPDATE ON customers_products
-BEGIN
-UPDATE customers_products SET last_modified = CURRENT_TIMESTAMP WHERE rowid = OLD.rowid;
-END
+--CREATE TRIGGER update_customers_products AFTER UPDATE ON customers_products
+--BEGIN
+--UPDATE customers_products SET last_modified = CURRENT_TIMESTAMP WHERE rowid = OLD.rowid;
+--END
 
 
 CREATE TABLE transactions
@@ -58,9 +58,9 @@ CREATE TABLE transactions
     dt TEXT NOT NULL, -- iso8601 string format supplied from 3rd party
     action STRING NOT NULL, -- 'new', 'cancelled'
     amount INTEGER NOT NULL DEFAULT 0, -- stored as cents
-    created STRING DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES (customers.id),
-    FOREIGN KEY (product_id) REFERENCES (products.id)
+    created STRING DEFAULT CURRENT_TIMESTAMP --,
+    --FOREIGN KEY (customer_id) REFERENCES (customers.id),
+    --FOREIGN KEY (product_id) REFERENCES (products.id)
 );
 
 CREATE INDEX idx_transactions_customer_id ON transactions(customer_id);

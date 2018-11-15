@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import sys
 
@@ -14,6 +15,11 @@ DATA_DIR = os.environ.get('DATA_DIR', os.path.sep.join([INST_DIR, 'data']))
 DATABASE = os.path.sep.join([DATA_DIR, 'atldata.db'])
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', os.path.sep.join([INST_DIR, 'uploads']))
 ALLOWED_EXTENSIONS = ['tsv', 'csv']
+DB_FILE = os.path.sep.join([INST_DIR, 'data', 'atldata.db'])
+SCHEMA_FILE = os.path.sep.join([INST_DIR, 'sql', 'schema.sql'])
+
+
+log = logging.getLogger(__name__)
 
 
 def allowed_file(filename):
@@ -44,18 +50,15 @@ def configured_app(config_module=None, debug=False):
         "Accepts POST data via Ajax request, returns status report as JSON"
 
         if 'custdata' not in request.files:
-            flash('No file uploaded')
-            return redirect(url_for('index'))
+            return jsonify({'errors': ['No file uploaded']})
 
         f = request.files['custdata']
 
         if not f.filename:
-            flash('No selected file')
-            return redirect(url_for('index'))
+            return jsonify({'errors': ['No selected file']})
 
         if not allowed_file(f.filename):
-            flash('Only {} files accepted'.format(', '.join(ALLOWED_EXTENSIONS)))
-            return redirect(url_for('index'))
+            return jsonify({'errors': ['Only {} files accepted'.format(', '.join(ALLOWED_EXTENSIONS))]})
 
         filename = secure_filename(f.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -65,10 +68,10 @@ def configured_app(config_module=None, debug=False):
         except Exception as ex:
             # There are very few times I will accept bare exceptions,
             # this is mostly a concession to time constraints
-            flash(str(ex))
-            return redirect(url_for('index'))
+            log.error('An error occurred: {}'.format(str(ex)))
+            return jsonify({'errors': ['An error occurred']})
 
-        msgs = ingest_file(filepath)
+        msgs = ingest_file(filepath, DB_FILE, SCHEMA_FILE)
         return jsonify(msgs)
 
 
