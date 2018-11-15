@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 {% block body %}
   <h1>Upload Customer Data</h1>
-  <div>
-    <form enctype="multipart/form-data" method="POST">
-        <input type="file" name="custdata">
-        <br>
-        <input type="submit">
-    </form>
-  </div>
-{% endblock %}
 
+  <div id="custdatadiv">
+    <div id="custdatainstruction">Select a file to upload</div>
+    <form enctype="multipart/form-data">
+    <div id="custdatafilediv"><input type="file" name="custdata" id="custdatafile"></div>
+    <div id="custdatasubmitdiv"><input type="submit" id="custdatasubmit"></div>
+    </form>
+    <div id="custdataprogressdiv"><div id="custdataprogress"></div></div>
+    <div id="custdatastatus"></div>
+  </div>
+
+<script src="/static/js/index.js"></script>
+{% endblock %}

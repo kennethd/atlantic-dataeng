@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from flask import Flask, flash, request, redirect, render_template
+from flask import Flask, flash, jsonify, request, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 
 from atldata.ingest import ingest_file
@@ -34,45 +34,46 @@ def configured_app(config_module=None, debug=False):
     if debug:
         app.debug = True
 
-    @app.route('/', methods=['GET', 'POST'])
-    def upload_customer_data():
-        if request.method == 'POST':
-
-            print(request.files)
-            print(request.files['custdata'])
-            print(dir(request.files['custdata']))
-
-            if 'custdata' not in request.files:
-                flash('No file uploaded')
-                return redirect(request.url)
-
-            f = request.files['custdata']
-
-            if not f.filename:
-                flash('No selected file')
-                return redirect(request.url)
-
-            if not allowed_file(f.filename):
-                flash('Only {} files accepted'.format(', '.join(ALLOWED_EXTENSIONS)))
-                return redirect(request.url)
-
-            filename = secure_filename(f.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            try:
-                f.save(filepath)
-            except Exception as ex:
-                # There are very few times I will accept bare exceptions,
-                # this is mostly a concession to time constraints
-                flash(str(ex))
-                return redirect(request.url)
-
-            msgs = ingest_file(filepath)
-            for msg in msgs:
-                flash(msg)
-            return redirect(request.url)
-
+    @app.route('/', methods=['GET'])
+    def index():
         return render_template('index.html')
+
+    @app.route('/custdataupload', methods=['POST'])
+    def upload_customer_data():
+        "Accepts POST data via Ajax request, returns status report as JSON"
+
+        print(request.files)
+        print(request.files['custdata'])
+        print(dir(request.files['custdata']))
+
+        if 'custdata' not in request.files:
+            flash('No file uploaded')
+            return redirect(url_for('index'))
+
+        f = request.files['custdata']
+
+        if not f.filename:
+            flash('No selected file')
+            return redirect(url_for('index'))
+
+        if not allowed_file(f.filename):
+            flash('Only {} files accepted'.format(', '.join(ALLOWED_EXTENSIONS)))
+            return redirect(url_for('index'))
+
+        filename = secure_filename(f.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        try:
+            f.save(filepath)
+        except Exception as ex:
+            # There are very few times I will accept bare exceptions,
+            # this is mostly a concession to time constraints
+            flash(str(ex))
+            return redirect(url_for('index'))
+
+        msgs = ingest_file(filepath)
+        return jsonify(msgs)
+
 
     @app.errorhandler(404)
     def page_not_found(e):
