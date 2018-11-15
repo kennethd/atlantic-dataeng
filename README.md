@@ -30,6 +30,7 @@ testing is important to me and I usually aim for > 95% coverage.
 
 Of the branches available here:
 
+  * **master** currently has all of the latest code merged into it
   * **initial-submission** is how far I got more or less within the instructed
     time constraints, about 2.5 hours + the README
   * **diyorm** is the state of the project after the first successful data
@@ -37,6 +38,21 @@ Of the branches available here:
     and API changes, and about the same for the backend data layer completion
     (if you don't count time wasted trying to get FOREIGN KEY and TRIGGER
     support working in my sqlite3)
+
+# Roadmap
+
+If I were seriously going forward with this, I would probably take the time to
+refresh my memory about SQLAlchemy.  To support large files, I'd probably also
+look into something like Flask-SocketIO to provide incremental feedback, and
+chunk the uploads, procecessing every couple of thousand lines separately.
+
+One of the nits that bugs me most about the current implementation is the
+connection handling.  I wanted to have granular control of transactions,
+saving arbitrary numbers of models per each one, but I feel it's kind of
+ridiculous needing to pass a cursor to a model's save() method -- probably
+SQLAlchemy would solve this for me, but at the very least I'd probably memoize
+dbconn() with an open connections cache.  Again, I was just way over the time
+to justify refactoring anything.
 
 # Setup
 
