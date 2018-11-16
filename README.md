@@ -19,12 +19,12 @@ easily reusing code via CLI tools or importing functionality into related projec
 
 The Flask app is a bit simplified, in similar situations in the past, I have
 defined the core of the web interface in the library itself as a Flask
-Blueprint, further minimizing the custom code in the web app layer.  Most of
-the flaskapp tests are just stubs to illustrate the approach I would take in
-creating them.
+Blueprint, further minimizing the custom code in the web app layer.
 
-Hopefully the existing test stubs provide an idea of how I organize tests,
-testing is important to me and I usually aim for > 95% coverage.
+Most of the flaskapp tests are just stubs to illustrate the approach I would
+take in creating them.  Hopefully the existing test stubs provide an idea of
+how I organize tests, testing is important to me and I usually aim for > 95%
+coverage.
 
 # Branches
 
